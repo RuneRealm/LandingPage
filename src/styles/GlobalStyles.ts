@@ -2,7 +2,7 @@ import { createGlobalStyle } from 'styled-components';
 
 const GlobalStyles = createGlobalStyle`
   :root {
-    --primary-color: #663a31;
+    --primary-color: #ffd54f;
     --secondary-color: #705264;
     --text-light: #ffffff;
     --text-dark: #333333;
@@ -19,11 +19,7 @@ const GlobalStyles = createGlobalStyle`
     box-sizing: border-box;
   }
 
-  html {
-    scroll-behavior: smooth;
-  }
-
-  body {
+  html, body {
     font-family: 'Inter', 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
     background: linear-gradient(to right, rgba(112, 82, 100, 0.8), rgba(186, 120, 103, 0.8));
     color: var(--text-light);
@@ -31,6 +27,14 @@ const GlobalStyles = createGlobalStyle`
     overflow-x: hidden;
     line-height: 1.6;
     position: relative;
+    scroll-behavior: smooth;
+    
+    /* Hide scrollbar but keep scrolling functionality */
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+    &::-webkit-scrollbar {
+      display: none; /* Chrome, Safari, Opera */
+    }
   }
 
   body::before {
