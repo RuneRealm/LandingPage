@@ -221,17 +221,6 @@ const Hero: React.FC = () => {
       videoRef.current.playbackRate = 3.0; // Set playback speed to 2x
     }
   }, []);
-
-  // Auto-reveal text after a short delay
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setScrollProgress(1);
-      setTextFullyRevealed(true);
-      setShowContinueButton(true);
-    }, 1500); // Show text after 1.5 seconds
-    
-    return () => clearTimeout(timer);
-  }, []);
   
   // Handle wheel events for text reveal
   useEffect(() => {
@@ -239,16 +228,26 @@ const Hero: React.FC = () => {
       if (!canScrollPast) {
         e.preventDefault();
         
-        // Only allow scrolling past when text is fully revealed
-        if (textFullyRevealed && e.deltaY > 0) {
-          setCanScrollPast(true);
-        }
+        // Update scroll progress based on wheel delta
+        const delta = e.deltaY;
+        setScrollProgress(prev => {
+          const newProgress = Math.max(0, Math.min(prev + delta / 500, 1));
+          
+          // Enable scrolling past when text is fully visible
+          if (newProgress >= 1 && !canScrollPast) {
+            setCanScrollPast(true);
+            setTextFullyRevealed(true);
+            setShowContinueButton(true);
+          }
+          
+          return newProgress;
+        });
       }
     };
     
     window.addEventListener('wheel', handleWheel, { passive: false });
     return () => window.removeEventListener('wheel', handleWheel);
-  }, [canScrollPast, textFullyRevealed]);
+  }, [canScrollPast]);
   
   // Handle scroll events
   useEffect(() => {
@@ -283,12 +282,22 @@ const Hero: React.FC = () => {
         const touchY = e.touches[0].clientY;
         const deltaY = touchStartY - touchY;
         
-        // Only allow scrolling past when text is fully revealed
-        if (textFullyRevealed && deltaY > 0) {
-          setCanScrollPast(true);
-        } else {
-          e.preventDefault();
-        }
+        // Update scroll progress based on touch movement
+        setScrollProgress(prev => {
+          const newProgress = Math.max(0, Math.min(prev + deltaY / 300, 1));
+          
+          // Enable scrolling past when text is fully visible
+          if (newProgress >= 1 && !canScrollPast) {
+            setCanScrollPast(true);
+            setTextFullyRevealed(true);
+            setShowContinueButton(true);
+          }
+          
+          return newProgress;
+        });
+        
+        touchStartY = touchY;
+        e.preventDefault();
       }
     };
     
@@ -299,7 +308,7 @@ const Hero: React.FC = () => {
       document.removeEventListener('touchstart', handleTouchStart);
       document.removeEventListener('touchmove', handleTouchMove);
     };
-  }, [canScrollPast, textFullyRevealed]);
+  }, [canScrollPast]);
   
   // Handle keydown events for arrow keys
   useEffect(() => {
@@ -307,16 +316,25 @@ const Hero: React.FC = () => {
       if (!canScrollPast && e.key === 'ArrowDown') {
         e.preventDefault();
         
-        // Only allow scrolling past when text is fully revealed
-        if (textFullyRevealed) {
-          setCanScrollPast(true);
-        }
+        // Increase scroll progress on key down
+        setScrollProgress(prev => {
+          const newProgress = Math.min(prev + 0.1, 1);
+          
+          // Enable scrolling past when text is fully visible
+          if (newProgress >= 1 && !canScrollPast) {
+            setCanScrollPast(true);
+            setTextFullyRevealed(true);
+            setShowContinueButton(true);
+          }
+          
+          return newProgress;
+        });
       }
     };
     
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [canScrollPast, textFullyRevealed]);
+  }, [canScrollPast]);
 
   // Handle the continue button click
   const handleContinueClick = () => {
